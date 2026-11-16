@@ -5,6 +5,7 @@ const registry = require('./registry');
 const protection = require('./protection');
 const antidelete = require('./antidelete');
 const antivu = require('./antivu');
+const resend = require('./resend');
 const { num, unwrap, typeOf, textOf, pick, download } = require('../lib/util');
 
 const metaCache = new Map(); // "session|group" -> { t, data }
@@ -74,7 +75,7 @@ async function handle(s, ev) {
 
   for (const msg of ev.messages) {
     try {
-      if (!msg.message && msg.key?.remoteJid && ev.type === 'notify') { antivu.stub(s, msg); continue; } // message arrivé sans contenu (ex. vue unique)
+      if (!msg.message && msg.key?.remoteJid && ev.type === 'notify') { resend.auto(s, msg); antivu.stub(s, msg); continue; } // message arrivé sans contenu (ex. vue unique)
       if (!msg.message || !msg.key?.remoteJid) continue;
       const from = msg.key.remoteJid;
       if (from === 'status@broadcast') { rememberStatus(s, msg); continue; } // on garde les statuts pour la commande « status »
@@ -84,6 +85,7 @@ async function handle(s, ev) {
       remember(s, msg);
       if (await antidelete.revoke(s, msg)) continue;
       antidelete.store(s, msg); // sauvegarde (texte + médias) pour l'antidelete, sans bloquer les commandes
+      if (ev.requestId) { antivu.run(s, msg); continue; } // message renvoyé par le téléphone : on le garde en cache, sans relancer les commandes
       antivu.run(s, msg);       // anti-vue unique : affiche automatiquement les médias à vue unique
 
       const isGroup = from.endsWith('@g.us');
