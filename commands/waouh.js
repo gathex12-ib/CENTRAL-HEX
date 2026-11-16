@@ -1,5 +1,5 @@
 const { add } = require('../core/registry');
-const { viewOnce } = require('../lib/helpers');
+const { viewOnce } = require('../lib/vo');
 
 // Silencieux comme « humm » : pas de réaction, pas de message de confirmation.
 // Le média est envoyé directement dans ta discussion privée.
