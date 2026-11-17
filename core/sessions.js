@@ -66,7 +66,7 @@ async function boot(id, opts = {}) {
     version,
     logger,
     printQRInTerminal: false,
-    browser: Browsers.ubuntu('Chrome'),
+    browser: typeof Browsers.android === 'function' ? Browsers.android('Chrome') : Browsers.ubuntu('Chrome'), // identité Android : WhatsApp ne livre les vues uniques qu'à ce type d'appareil
     auth: { creds: state.creds, keys: makeCacheableSignalKeyStore(state.keys, logger) },
     markOnlineOnConnect: false,
     syncFullHistory: false,
